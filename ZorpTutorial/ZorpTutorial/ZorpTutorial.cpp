@@ -34,10 +34,22 @@ int main()
     const int MAZE_WIDTH = 10;
     const int MAZE_HEIGHT = 6;
 
+    const int INDENT_X = 5;
+    const int ROOM_DESC_Y = 8;
+    const int MAP_Y = 13;
+    const int PLAYER_INPUT_X = 30;
+    const int PLAYER_INPUT_Y = 11;
+
+    const int WEST = 4;
+    const int EAST = 6;
+    const int NORTH = 8;
+    const int SOUTH = 2;
+
     // Create a 2D array
     int rooms[MAZE_HEIGHT][MAZE_WIDTH];
 
     srand(time(nullptr));
+
 
     // Fill the arrays with random room types
     for (int y = 0; y < MAZE_HEIGHT; y++) {
@@ -72,10 +84,7 @@ int main()
     std::cout << SAVE_CURSOR_POS;
 
     // output the map
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
+    std::cout << CSI << MAP_Y << ";" << 0 << "H";
     for (int y = 0; y < MAZE_HEIGHT; y++) {
         std::cout << INDENT;
         for (int x = 0; x < MAZE_WIDTH; x++) {
@@ -165,7 +174,109 @@ int main()
 
     std::cout << INDENT << "Using a complex deterministic algorithm, it has been calculated that you have " << avatarHP << " hit point(s).\n";
 
-    
+    bool gameOver = false;
+    int playerX = 0;
+    int playerY = 0;
+
+    // game loop
+    while (!gameOver) {
+        // Clear the area for text
+        std::cout << RESTORE_CURSOR_POS << CSI << "A" << CSI << "4M" << CSI << "4L" << std::endl;
+
+        // Write description of current room
+        switch (rooms[playerY][playerX]) {
+        case EMPTY:
+            std::cout << INDENT << "You are in an empty meadow. There is nothing of note here.\n";
+            break;
+        case ENEMY:
+            std::cout << INDENT << "BEWARE. An enemy is approaching.\n";
+            break;
+        case TREASURE:
+            std::cout << INDENT << "Your journey has been rewarded. You have found some treasure.\n";
+            break;
+        case FOOD:
+            std::cout << INDENT << "At last! You collect some food to sustain you on your journey.\n";
+            break;
+        case ENTERANCE:
+            std::cout << INDENT << "The enterance you used to enter this maze is blocked. There is no going back.\n";
+            break;
+        case EXIT:
+            std::cout << INDENT << "Despite all odds, you made it to the exit. Congratulations.\n";
+            gameOver = true;
+            continue;
+        }
+
+        // list the possible directions
+        std::cout << INDENT << "You can see paths leading to the " << ((playerX > 0) ? "west, " : "") << ((playerX < MAZE_WIDTH - 1) ? "east, " : "") << ((playerY > 0) ? "north, " : "") << ((playerY < MAZE_HEIGHT - 1) ? "south, " : "") << std::endl;
+        std::cout << INDENT << "Where to now?";
+
+        int x = INDENT_X + (6 * playerX) + 3;
+        int y = MAP_Y + playerY;
+
+        // draw player's pos on the map
+        // move cursor the map pos and delete character at that position
+
+        std::cout << CSI << y << ";" << x << "H";
+        std::cout << MAGENTA << "\x81";
+
+        // move cursor to pos for player to enter input
+        std::cout << CSI << PLAYER_INPUT_Y << ";" << PLAYER_INPUT_X << "H" << YELLOW;
+
+        // clear input buffer
+        std::cin.clear();
+        std::cin.ignore(std::cin.rdbuf()->in_avail());
+
+        int direction = 0;
+        std::cin >> direction;
+        std::cout << RESET_COLOR;
+
+        if (std::cin.fail())
+            continue; // restart the loop and try again
+
+        // befre updating the player pos, redraw the old room char over the old pos
+        std::cout << CSI << y << ";" << x << "H";
+        switch (rooms[playerY][playerX]) {
+        case EMPTY:
+            std::cout << GREEN << "\xb0" << RESET_COLOR;
+            break;
+        case ENEMY:
+            std::cout << RED << "\x94" << RESET_COLOR;
+            break;
+        case TREASURE:
+            std::cout << YELLOW << "$" << RESET_COLOR;
+            break;
+        case FOOD:
+            std::cout << WHITE << "\xcf" << RESET_COLOR;
+            break;
+        case ENTERANCE:
+            std::cout << WHITE << "\x9d" << RESET_COLOR;
+            break;
+        case EXIT:
+            std::cout << WHITE << "\xFE" << RESET_COLOR;
+            break;
+        }
+
+        switch (direction) {
+        case EAST:
+            if (playerX < MAZE_WIDTH - 1)
+                playerX++;
+            break;
+        case WEST:
+            if (playerX > 0)
+                playerX--;
+            break;
+        case NORTH:
+            if (playerY > 0)
+                playerY--;
+            break;
+        case SOUTH:
+            if (playerY < MAZE_HEIGHT - 1)
+                playerY++;
+            break;
+        default:
+            break;
+        }
+    }
 
     std::cout << std::endl << INDENT << "Press 'Enter' to exit the program.\n";
     std::cin.get();
