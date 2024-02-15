@@ -41,6 +41,17 @@ const int SOUTH = 2;
 const int LOOK = 9;
 const int FIGHT = 10;
 
+
+struct Point2D {
+    int x;
+    int y;
+};
+
+
+
+
+
+
 bool enableVirtualTerminal() {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE)
@@ -68,7 +79,6 @@ void initialize(int map[MAZE_HEIGHT][MAZE_WIDTH]) {
                 map[y][x] = type;
             else
                 map[y][x] = EMPTY;
-            //rooms[y][x] = rand() % MAX_RANDOM_TYPE;
         }
     }
 
@@ -83,12 +93,12 @@ void drawWelcomeMessage() {
     std::cout << INDENT << "It is definetly not related to any other text-based adventure game.\n";
 }
 
-void drawRoom(int map[MAZE_HEIGHT][MAZE_WIDTH], int x, int y) {
-    int outX = INDENT_X + (6 * x) + 1;
-    int outY = MAP_Y + y;
+void drawRoom(int map[MAZE_HEIGHT][MAZE_WIDTH], Point2D position) {
+    int outX = INDENT_X + (6 * position.x) + 1;
+    int outY = MAP_Y + position.y;
 
     std::cout << CSI << outY << ";" << outX << "H";
-    switch (map[y][x]) {
+    switch (map[position.y][position.x]) {
     case EMPTY:
          std::cout << "[ " << GREEN << "\xb0" << RESET_COLOR << " ] ";
          break;
@@ -111,12 +121,14 @@ void drawRoom(int map[MAZE_HEIGHT][MAZE_WIDTH], int x, int y) {
 }
 
 void drawMap(int map[MAZE_HEIGHT][MAZE_WIDTH]) {
+    Point2D position = { 0,0 };
+
     // reset draw colors
     std::cout << RESET_COLOR;
-    for (int y = 0; y < MAZE_HEIGHT; y++) {
+    for (position.y = 0; position.y < MAZE_HEIGHT; position.y++) {
         std::cout << INDENT;
-        for (int x = 0; x < MAZE_WIDTH; x++) {
-            drawRoom(map, x, y);
+        for (position.x = 0; position.x < MAZE_WIDTH; position.x++) {
+            drawRoom(map, position);
         }
         std::cout << std::endl;
     }
@@ -153,9 +165,9 @@ void drawRoomDescription(int roomType) {
     }
 }
 
-void drawPlayer(int x, int y) {
-    int outX = INDENT_X + (6 * x) + 3;
-    int outY = MAP_Y + y;
+void drawPlayer(Point2D position) {
+    int outX = INDENT_X + (6 * position.x) + 3;
+    int outY = MAP_Y + position.y;
 
     // draw player's pos on the map
     // move cursor the map pos and delete character at that position
@@ -163,35 +175,14 @@ void drawPlayer(int x, int y) {
     std::cout << MAGENTA << "\x81" << RESET_COLOR;
 }
 
-void drawValidDirections(int x, int y) {
+void drawValidDirections(Point2D position) {
     // reset draw colors
     std::cout << RESET_COLOR;
 
     // jump to the correct location
     std::cout << CSI << MOVEMENT_DESC_Y + 1 << ";" << 0 << "H";
-    std::cout << INDENT << "You can see paths leading to the " << ((x > 0) ? "west, " : "") << ((x < MAZE_WIDTH - 1) ? "east, " : "") << ((y > 0) ? "north, " : "") << ((y < MAZE_HEIGHT - 1) ? "south, " : "") << std::endl;
+    std::cout << INDENT << "You can see paths leading to the " << ((position.x > 0) ? "west, " : "") << ((position.x < MAZE_WIDTH - 1) ? "east, " : "") << ((position.y > 0) ? "north, " : "") << ((position.y < MAZE_HEIGHT - 1) ? "south, " : "") << std::endl;
 }
-
-//int getMovementDirection() {
-//    // jump to the correct location
-//    std::cout << CSI << PLAYER_INPUT_Y << ";" << 0 << "H";
-//    std::cout << INDENT << "Where to now?";
-//
-//    int direction;
-//    // move cursor to position for player to enter input
-//    std::cout << CSI << PLAYER_INPUT_Y << ";" << PLAYER_INPUT_X << "H" << YELLOW;
-//
-//    // clear input buffer
-//    std::cin.clear();
-//    std::cin.ignore(std::cin.rdbuf()->in_avail());
-//
-//    std::cin >> direction;
-//    std::cout << RESET_COLOR;
-//
-//    if (std::cin.fail())
-//        return 0;
-//    return direction;
-//}
 
 int getCommand() {
     char input[50] = "\0";
@@ -246,8 +237,7 @@ int main()
     int rooms[MAZE_HEIGHT][MAZE_WIDTH];
 
     bool gameOver = false;
-    int playerX = 0;
-    int playerY = 0;
+    Point2D player = { 0, 0 };
 
     // try enable the virtual terminal, exit if it doesn't work
     if (!enableVirtualTerminal()) {
@@ -268,42 +258,42 @@ int main()
 
     // game loop
     while (!gameOver) {
-        drawRoomDescription(rooms[playerY][playerX]);
+        drawRoomDescription(rooms[player.y][player.x]);
 
-        drawPlayer(playerX, playerY);
+        drawPlayer(player);
 
-        if (rooms[playerY][playerX] == EXIT) {
+        if (rooms[player.y][player.x] == EXIT) {
             gameOver = true;
             continue;
         }
 
         // List directions the player can take then ask for the direction
-        drawValidDirections(playerX, playerY);
+        drawValidDirections(player);
         int command = getCommand();
 
         // Redraw the old room before moving the player
-        drawRoom(rooms, playerX, playerY);
+        drawRoom(rooms, player);
 
 
         switch (command) {
         case EAST:
-            if (playerX < MAZE_WIDTH - 1)
-                playerX++;
+            if (player.x < MAZE_WIDTH - 1)
+                player.x++;
             break;
         case WEST:
-            if (playerX > 0)
-                playerX--;
+            if (player.x > 0)
+                player.x--;
             break;
         case NORTH:
-            if (playerY > 0)
-                playerY--;
+            if (player.y > 0)
+                player.y--;
             break;
         case SOUTH:
-            if (playerY < MAZE_HEIGHT - 1)
-                playerY++;
+            if (player.y < MAZE_HEIGHT - 1)
+                player.y++;
             break;
         case LOOK:
-            drawPlayer(playerX, playerY);
+            drawPlayer(player);
             std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You look around, but see nothing worth mentioning\n";
             std::cout << INDENT << "Press 'Enter' to continue";
             std::cin.clear();
@@ -311,14 +301,14 @@ int main()
             std::cin.get();
             break;
         case FIGHT:
-            drawPlayer(playerX, playerY);
+            drawPlayer(player);
             std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You could try to fight, but you don't have a weapon\n";
             std::cout << INDENT << "Press 'Enter' to continue";
             std::cin.clear();
             std::cin.ignore(std::cin.rdbuf()->in_avail());
             std::cin.get();
         default:
-            drawPlayer(playerX, playerY);
+            drawPlayer(player);
             std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You try, but you just can't do it.\n";
             std::cout << INDENT << "Press 'Enter' to continue";
             std::cin.clear();
