@@ -92,8 +92,11 @@ void Game::initializeMap() {
 	for (int y = 0; y < MAZE_HEIGHT; y++) {
 		for (int x = 0; x < MAZE_WIDTH; x++) {
 			int type = rand() % (MAX_RANDOM_TYPE * 2);
-			if (type < MAX_RANDOM_TYPE)
+			if (type < MAX_RANDOM_TYPE) {
+				if (type == TREASURE)
+					type = rand() % 3 + TREASURE_HP;
 				m_map[y][x].setType(type);
+			}
 			else
 				m_map[y][x].setType(EMPTY);
 			m_map[y][x].setPosition(Point2D{ x,y });
@@ -145,8 +148,11 @@ int Game::getCommand()
 
 	// jump to correct location
 	std::cout << CSI << PLAYER_INPUT_Y << ";" << 0 << "H";
-	// clear anmy existing text
+	// clear any existing text
 	std::cout << CSI << "4M";
+
+	// insert 4 blank lines to keep the inventory output in the same spot
+	std::cout << CSI << "4L";
 
 	std::cout << INDENT << "Enter a command.";
 	// move to input field for player to enter text
@@ -159,6 +165,7 @@ int Game::getCommand()
 	std::cout << RESET_COLOR;
 
 	bool bMove = false;
+	bool bPickup = false;
 	while (input) {
 		if (strcmp(input, "move") == 0) {
 			bMove = true;
@@ -172,6 +179,12 @@ int Game::getCommand()
 				return EAST;
 			if (strcmp(input, "west") == 0)
 				return WEST;
+			if (strcmp(input, "pick") == 0)
+				bPickup = true;
+			else if (bPickup == true) {
+				if (strcmp(input, "up") == 0)
+					return PICKUP;
+			}
 		}
 
 		if (strcmp(input, "look") == 0)

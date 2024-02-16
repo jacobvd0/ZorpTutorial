@@ -45,6 +45,11 @@ void Room::draw()
     case TREASURE:
         std::cout << "[ " << YELLOW << "$" << RESET_COLOR << " ] ";
         break;
+    case TREASURE_HP:
+    case TREASURE_AT:
+    case TREASURE_DF:
+        std::cout << "[ " << YELLOW << "$" << RESET_COLOR << " ] ";
+        break;
     case FOOD:
         std::cout << "[ " << WHITE << "\xcf" << RESET_COLOR << " ] ";
         break;
@@ -73,6 +78,11 @@ void Room::drawDescription()
         break;
     case TREASURE:
         std::cout << INDENT << "Your journey has been rewarded. You have found some treasure.\n";
+        break;
+    case TREASURE_HP:
+    case TREASURE_AT:
+    case TREASURE_DF:
+        std::cout << INDENT << "There appears to be some treasure here. Perhaps you should investigate further.\n";
         break;
     case FOOD:
         std::cout << INDENT << "At last! You collect some food to sustain you on your journey.\n";
