@@ -23,7 +23,7 @@ void Player::setPosition(Point2D position)
 
 Point2D Player::getPosition()
 {
-	return Point2D();
+	return m_mapPosition;
 }
 
 void Player::draw()
