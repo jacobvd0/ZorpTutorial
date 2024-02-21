@@ -2,6 +2,7 @@
 #include "GameDefines.h"
 #include <iostream>
 #include <algorithm>
+#include "Room.h"
 
 Player::Player() : m_mapPosition(Point2D{ 0, 0 }), m_healthPoints{100}, m_attackPoints{20}, m_defendPoints{20} {
 }
@@ -36,7 +37,7 @@ void Player::draw()
     }
 }
 
-bool Player::pickup(int roomType)
+bool Player::pickup(Room* room)
 {
     static const char itemNames[15][30] = {
         "indifference", "invisibility", "invulnerability", "incontinence",
@@ -48,7 +49,7 @@ bool Player::pickup(int roomType)
     int item = rand() % 15;
     char name[30] = "";
 
-    switch (roomType) {
+    switch (room->getType()) {
     case TREASURE_HP:
         strcpy_s(name, 30, "potion of ");
         break;
@@ -70,6 +71,9 @@ bool Player::pickup(int roomType)
 
     std::sort(m_powerups.begin(), m_powerups.end(), Powerup::compare);
 
+    // set the room to empty to stop it being claimed multiple times
+    room->setType(EMPTY);
+
     std::cout << INDENT << "Press 'Enter' to continue.";
     std::cin.clear();
     std::cin.ignore(std::cin.rdbuf()->in_avail());
@@ -77,7 +81,7 @@ bool Player::pickup(int roomType)
     return true;
 }
 
-bool Player::executeCommand(int command, int roomType)
+bool Player::executeCommand(int command, Room* pRoom)
 {
     switch (command) {
     case EAST:
@@ -97,7 +101,7 @@ bool Player::executeCommand(int command, int roomType)
             m_mapPosition.y++;
         return true;
     case PICKUP:
-        return pickup(roomType);
+        return pickup(pRoom);
     }
     return false;
 }

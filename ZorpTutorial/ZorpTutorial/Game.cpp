@@ -41,7 +41,7 @@ void Game::update()
 
 	int command = getCommand();
 
-	if (m_player.executeCommand(command, m_map[playerPos.y][playerPos.x].getType()))
+	if (m_player.executeCommand(command, &m_map[playerPos.y][playerPos.x]))
 		return;
 
 	m_map[playerPos.y][playerPos.x].executeCommand(command);
