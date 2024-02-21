@@ -98,9 +98,16 @@ void Room::drawDescription()
 
 bool Room::executeCommand(int command)
 {
+    std::cout << EXTRA_OUTPUT_POS;
+
     switch (command) {
     case LOOK:
-        std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You look around, but see nothing worth mentioning\n";
+        if (m_type == TREASURE_HP || m_type == TREASURE_AT || m_type == TREASURE_DF) {
+            std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "There is some treasure here. It looks small enough to pick up.\n";
+        }
+        else {
+            std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You look around, but see nothing worth mentioning\n";
+        }
         std::cout << INDENT << "Press 'Enter' to continue";
         std::cin.clear();
         std::cin.ignore(std::cin.rdbuf()->in_avail());
