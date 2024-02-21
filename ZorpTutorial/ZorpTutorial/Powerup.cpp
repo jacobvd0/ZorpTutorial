@@ -1,7 +1,12 @@
 #include "Powerup.h"
+#include <iostream>
 
 Powerup::Powerup(const char name[30], float health, float attack, float defense)
 {
+	strcpy_s(m_name, 30, name);
+	m_healthMultiplier = health;
+	m_attackMultiplier = attack;
+	m_defenseMultiplier = defense;
 }
 
 Powerup::~Powerup()
@@ -10,20 +15,20 @@ Powerup::~Powerup()
 
 char* Powerup::getName()
 {
-	return nullptr;
+	return m_name;
 }
 
 float Powerup::getHealthMultiplier()
 {
-	return 0.0f;
+	return m_healthMultiplier;
 }
 
 float Powerup::getAttackMultiplier()
 {
-	return 0.0f;
+	return m_attackMultiplier;
 }
 
 float Powerup::getDefenseMultiplier()
 {
-	return 0.0f;
+	return m_defenseMultiplier;
 }

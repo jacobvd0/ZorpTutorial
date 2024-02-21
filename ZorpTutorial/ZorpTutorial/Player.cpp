@@ -65,7 +65,7 @@ bool Player::pickup(int roomType)
     strncat_s(name, itemNames[item], 30);
     std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You pick up the " << name << std::endl;
     
-    //m_powerups.push_back(Powerup(name, 1, 1, 1.1f));
+    m_powerups.push_back(Powerup(name, 1, 1, 1.1f));
 
     std::cout << INDENT << "Press 'Enter' to continue.";
     std::cin.clear();
